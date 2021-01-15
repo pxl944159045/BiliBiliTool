@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -70,11 +70,6 @@ namespace Ray.BiliBiliTool.DomainService
             {
                 //一个月执行一次就行
                 _logger.LogInformation("目标领取日期为{target}号，今天是{day}号，跳过领取任务", _dailyTaskOptions.DayOfReceiveVipPrivilege, day);
-                return;
-            }
-             if (userIfo.GetVipType() == 0)
-            {
-                _logger.LogInformation("不是会员或会员已过期，跳过领取任务");
                 return;
             }
 
