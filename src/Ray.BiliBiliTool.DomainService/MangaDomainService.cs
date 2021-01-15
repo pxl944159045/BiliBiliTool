@@ -37,7 +37,7 @@ namespace Ray.BiliBiliTool.DomainService
             BiliApiResponse response;
             try
             {
-                response = _mangaApi.ClockIn(_dailyTaskOptions.DevicePlatform).Result;
+                response = _mangaApi.ClockIn(_dailyTaskOptions.DevicePlatform).GetAwaiter().GetResult();
             }
             catch (Exception)
             {
@@ -62,11 +62,11 @@ namespace Ray.BiliBiliTool.DomainService
         /// </summary>
         /// <param name="reason_id">权益号，由https://api.bilibili.com/x/vip/privilege/my得到权益号数组，取值范围为数组中的整数
         /// 这里为方便直接取1，为领取漫读劵，暂时不取其他的值</param>
-        public void ReceiveMangaVipReward(int reason_id, UseInfo userIfo)
+        public void ReceiveMangaVipReward(int reason_id, UserInfo userInfo)
         {
             int day = DateTime.Today.Day;
 
-           if (day != _dailyTaskOptions.DayOfReceiveVipPrivilege)
+            if (day != _dailyTaskOptions.DayOfReceiveVipPrivilege)
             {
                 //一个月执行一次就行
                 _logger.LogInformation("目标领取日期为{target}号，今天是{day}号，跳过领取任务", _dailyTaskOptions.DayOfReceiveVipPrivilege, day);
@@ -78,7 +78,13 @@ namespace Ray.BiliBiliTool.DomainService
                 return;
             }
 
-            var response = _mangaApi.ReceiveMangaVipReward(reason_id).Result;
+            if (userInfo.GetVipType() == 0)
+            {
+                _logger.LogInformation("不是会员或会员已过期，跳过领取任务");
+                return;
+            }
+
+            var response = _mangaApi.ReceiveMangaVipReward(reason_id).GetAwaiter().GetResult();
             if (response.Code == 0)
             {
                 _logger.LogInformation($"大会员成功领取{response.Data.Amount}张漫读劵");
